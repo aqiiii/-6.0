@@ -1,0 +1,515 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define N 30
+#define G 6
+typedef struct Student{                         //学生结构体
+    char name[20];
+    long num;
+    float score[6];
+    float sum;
+	float aver;
+
+}STU;
+int InputList(int g);                                //输入函数
+int Menu();                                     //菜单函数
+int Num_seek(STU stu[],int g);                                     //查找函数
+int Name_seek(STU stu[],int g);
+int Rank();                                     //排名函数
+
+int Output(STU stu[],int g);                                   //输出函数
+int Out(STU stu[],int g);
+int Line();                                     //读取行数的函数
+int Stu_ave(STU stu[],int g);					//平均分函数
+int Course_ave(STU stu[],int g);
+int Num_sort(STU stu[],int g);
+int Name_sort(STU stu[],int g);
+int Score_sort(STU stu[],int g,int (*compare)(float a,float b));
+int Statistic(STU stu[],int g);	                            //统计函数 
+int Ascending(float a,float b);
+int Descending(float a,float b);
+
+int main(){
+    int t;
+    int g=0;
+    STU stu[N];
+	printf("请输入学科数：(最好写三个，文件中已经是录入三科成绩的六个人，可以直接查看)");
+    scanf("%d",&g);
+    do{
+        t=0;
+        switch(Menu()){
+            case 1:
+                { 
+                    t=InputList(g);
+                    break;
+                }
+            case 2:
+                {
+                	 t = 1;
+                    Statistic(stu,g);
+                   
+                    break;
+                }
+            case 3:
+                {
+                    t=1;
+                    Name_seek(stu,g);
+                    break;
+                }
+            case 4:
+                {
+                    t=1;
+                    Num_seek(stu,g);
+                    break;
+                }
+            case 5:
+                {
+                    t=1;
+                    Out(stu,g);
+                    Num_sort(stu,g);
+                    Output(stu,g);
+                    break;
+                }
+            case 6:
+                {
+                    t=1;
+                    Out(stu,g);
+                    Name_sort(stu,g);
+                    Output(stu,g);
+                    break;
+                }
+            case 7:
+                {
+                    t=1;
+                    Out(stu,g);
+                    Score_sort(stu,g,Ascending);
+                    Output(stu,g);
+                    break;
+                }
+            case 8:
+                {
+                    t=1;
+                    Out(stu,g);
+                    Score_sort(stu,g,Descending);
+                    Output(stu,g);
+                    break;
+                }
+            case 9:
+                {
+                    t=1;
+                    Course_ave(stu,g);
+                    break;
+                }
+            case 10:
+                {
+                	Out(stu,g);
+					Output(stu,g);
+					t=1;
+                    break;
+                }
+            case 11:
+                {
+                	
+					Stu_ave(stu,g);
+					t=1;
+                    break;
+                }
+            case 0:
+                {
+                    t=0;
+                    
+                    break;
+                }
+            default:t=1; 
+        } 
+
+    }while(t);
+
+    return 0;
+}
+int Menu(){
+    int choice;
+    printf("\n\t\t\t欢迎来到学生成绩管理系统！！\n");
+    printf("\t1，输入学号和成绩\t\t\t");
+    printf("\t2，成绩统计\t\t\n");
+    printf("\t3，按姓名查询成绩\t\t\t");
+    printf("\t4，按学号查询成绩\t\t\n");
+    printf("\t5，按学号排名\t\t\t\t");
+    printf("\t6，按姓名排名\t\t\n");
+    printf("\t7，按总分正序排名\t\t\t");
+    printf("\t8，按总分倒序排名\t\t\n");
+    printf("\t9，课程分析\t\t\t\t");
+    printf("\t10，输出列表\t\t\n");
+    printf("\t11，平均分和总分\t");
+    printf("\t\t\t0，退出\n");
+    printf("\n请输入选项：");
+    scanf("%d",&choice);
+    return choice;
+}
+int InputList(int g){
+    int n,i,j;
+    float sum[N];
+    float aver[N];
+    printf("请输入学生人数：");
+    scanf("%d",&n);
+    if(n+Line()>=N)
+        printf("学生人数已经超出三十人");
+    else{
+        STU stu[N];
+        for(i=0;i<n;i++)
+        {
+            printf("请输入第%d个人的姓名:",i+1);
+            scanf("%s",stu[i].name);
+            printf("请输入学号:");
+            scanf("%d",&stu[i].num);
+            for(j=0;j<g;j++)
+            {
+                printf("请输入第%d科成绩",j+1);
+                scanf("%f",&stu[i].score[j]);
+
+            }
+        }
+        for(i=0;i<n;i++)
+		{
+			sum[i]=0;
+			aver[i]=0;
+			for(j=0;j<g;j++)
+			{
+				sum[i]+=stu[i].score[j];
+			}
+				aver[i]=sum[i]/g;
+		}
+        FILE *fp=fopen("file.txt","a");
+        if(fp==NULL)
+        {
+            printf("打开文件失败！");
+        }
+        for(i=0;i<n;i++)
+        {
+        	stu[i].aver = aver[i];
+        	stu[i].sum = sum[i];
+            fprintf(fp,"%s\t%d\t%f\t%f",stu[i].name,stu[i].num,stu[i].aver,stu[i].sum);
+            for(j=0;j<g;j++)
+            {
+                fprintf(fp,"\t%f",stu[i].score[j]);
+
+            }
+            fprintf(fp,"\n");
+        }
+        fclose(fp);
+        printf("成绩录入成功！");
+    } 
+    return 1;
+}
+int Statistic(STU stu[],int g)
+{
+	Out(stu,g);
+	int n,k,l;
+	n = Line()-1;
+	STU A[G],B[G],C[G],D[G],E[G];
+	int a=0,b=0,c=0,d=0,e=0;
+	int i,j,total;
+	for(j=0;j<g;j++)
+	{
+		printf("\n学科：%d:\n",j+1);
+		for(i=0;i<n;i++)
+		{
+			if(stu[i].score[j]>=0&&stu[i].score[j]<60)
+				{
+					e++;
+					E[e-1]=stu[i];
+				}
+			else if(stu[i].score[j]<70)
+				{
+					d++;
+					D[d-1]=stu[i];
+				}
+			else if(stu[i].score[j]<80)
+			{
+				c++;
+				C[c-1]=stu[i];
+			}
+				
+			else if(stu[i].score[j]<90)
+			{
+				b++;
+				B[b-1]=stu[i];
+			}
+				
+			else if(stu[i].score[j]<100)
+			{
+				a++;
+				A[a-1]=stu[i];
+			}
+			
+
+		}
+		printf("a:%d人\n",a);	
+		for(k=0;k<a;k++)
+		{
+			printf("%s\t\t%d",A[k].name,A[k].num);
+        	for(l=0;l<g;l++)
+        	{
+           		printf("\t\t%.2f",A[k].score[l]);
+        	}
+        	printf("\n");
+		}
+		printf("b:%d人\n",b);
+			for(k=0;k<b;k++)
+		{
+			printf("%s\t\t%d",B[k].name,B[k].num);
+        	for(l=0;l<g;l++)
+        	{
+           		printf("\t\t%.2f",B[k].score[l]);
+        	}
+        	printf("\n");
+		}
+		printf("c:%d人\n",c);
+			for(k=0;k<c;k++)
+		{
+			printf("%s\t\t%d",C[k].name,C[k].num);
+        	for(l=0;l<g;l++)
+        	{
+           		printf("\t\t%.2f",C[k].score[l]);
+        	}
+        	printf("\n");
+		}
+		printf("d:%d人\n",d);
+			for(k=0;k<d;k++)
+		{
+			printf("%s\t\t%d",D[k].name,D[k].num);
+        	for(l=0;l<g;l++)
+        	{
+           		printf("\t\t%.2f",D[k].score[l]);
+        	}
+        	printf("\n");
+		}
+		printf("e:%d人\n",e);
+			for(k=0;k<e;k++)
+		{
+			printf("%s\t\t%d",E[k].name,E[k].num);
+        	for(l=0;l<g;l++)
+        	{
+           		printf("\t\t%.2f",E[k].score[l]);
+        	}
+        	printf("\n");
+		}
+		a=0;b=0;c=0;d=0;e=0;
+	}
+		
+		
+	}
+int Seek(){
+	 
+}
+int Num_seek(STU stu[],int g)
+{
+	Out(stu,g);
+	int n = Line();
+	long num;
+	int i,j;
+	printf("请输入你想要查找的学号\n");
+	scanf("%ld",&num);
+	for(i=0;i<n;i++)
+	{
+		if(stu[i].num == num)
+		{
+			printf("%ld\t%s\t",stu[i].num,stu[i].name);
+			for(j=0;j<g;j++)
+			{
+				printf("%.0f\t",stu[i].score[j]);
+			}
+//			printf("%.0f\t%.0f\n",stu[i].sum,stu[i].aver);
+//			return;
+		 } 
+	}
+	return 0;
+	printf("\n没有这个号码\n");
+}
+int Name_seek(STU stu[],int g)
+{
+	Out(stu,g);
+	int n;
+	n = Line();
+	char name[20];
+	int i,j;
+	printf("请输入你想要查找的姓名\n");
+	scanf("%s",name);
+	for(i=0;i<n;i++)
+	{
+		if(strcmp(stu[i].name,name)==0)
+		{
+			printf("%ld\t%s\t",stu[i].num,stu[i].name);
+			for(j=0;j<g;j++)
+			{
+				printf("%.0f\t",stu[i].score[j]);
+			}
+			printf("%.0f\t%.0f\n",stu[i].sum,stu[i].aver);
+
+		 } 
+	}
+	return 0;
+	printf("\n没有这个学生！\n");
+}
+
+
+int Out(STU stu[],int g){
+    int i,j,n;
+    n = Line()-1;
+    FILE *fp = fopen("file.txt","r");
+    if(fp == NULL){
+        printf("打开文件失败！");
+    }
+    for(i=0;i<n;i++)
+    {
+        fscanf(fp,"%s\t%d\t%f\t%f",stu[i].name,&stu[i].num,&stu[i].aver,&stu[i].sum);
+        for(j=0;j<g;j++)
+        {
+            fscanf(fp,"\t%f",&stu[i].score[j]);
+        }
+        fscanf(fp,"\n");
+    }
+        fclose(fp);
+}
+
+int Output(STU stu[],int g)
+{
+	
+		int i,j,n;
+	n = Line()-1;
+	for(i=0;i<n;i++)
+    {
+        printf("%s\t\t%d",stu[i].name,stu[i].num);
+        for(j=0;j<g;j++)
+        {
+            printf("\t\t%.2f",stu[i].score[j]);
+        }
+        printf("\n");
+    }
+}
+
+int Ascending(float a,float b)
+{
+	return a<b;
+}
+int Descending(float a,float b)
+{
+	return a>b;
+}
+
+int Line()
+{
+	
+    int c;
+    int lines=0;
+    FILE *fp=fopen("file.txt", "r");
+    if(fp)
+    {
+        while((c=fgetc(fp)) != EOF)
+            if(c=='\n') 
+			lines++;
+    }
+    fclose(fp);
+    return lines;
+}
+
+int Stu_ave(STU stu[],int g)
+{
+	Out(stu,g);
+	int n = Line()-1;
+	int i,j;
+	for (i=0;i<n;i++)
+	{
+		printf("学生%d：总成绩%.1f,平均成绩：%.1f\n",i+1,stu[i].sum,stu[i].aver);
+	}
+}
+
+int Course_ave(STU stu[],int g)
+{
+	Out(stu,g);
+	int n = Line()-1;
+	int i,j;
+	float sum[G],aver[G];
+	for(i=0;i<g;i++)
+	{
+		sum[i]=0;
+		aver[i]=0;
+		for(j=0;j<n;j++)
+		{
+			sum[i]+=stu[j].score[i];
+		}
+		aver[i]=sum[i]/n;
+		printf("课程%d:总成绩：%.1f,平均成绩：%.1f\n",i+1,sum[i],aver[i]);
+	}
+
+}
+
+int Num_sort(STU stu[],int g)
+{
+	int n = Line()-1;
+	int i,j,k,t;
+	STU temp;
+		for(i=0;i<n;i++)
+	{
+		k=i;
+		for(j=i+1;j<n;j++)
+		{
+			if(stu[j].num<stu[k].num)
+				k=j;	
+		}
+		if(k!=i)
+			{
+				temp = stu[i];
+				stu[i] = stu[k];
+				stu[k] = temp;
+			}
+	}
+}
+int Name_sort(STU stu[],int g)
+{
+	Out(stu,g);
+	int n = Line()-1;
+	int i,j,t,k;
+	STU temp;
+	for(i=0;i<n;i++)
+	{
+		k = i;
+		for(j=i+1;j<n;j++)
+		{
+			if(strcmp(stu[j].name,stu[k].name)<0)
+				k = j; 
+		} 
+		if(k!=i)
+			{
+				temp = stu[i];
+				stu[i] = stu[k];
+				stu[k] = temp;
+			}
+	}
+	
+}
+
+int Score_sort(STU stu[],int g,int (*compare)(float a,float b))  //比的是总分 
+{
+	Out(stu,g);
+	int n = Line()-1;
+	int i,j,k,t;
+	STU temp;
+	for(i=0;i<n;i++)
+	{
+		k=i;
+		for(j=i+1;j<n;j++)
+		{
+			if((*compare)(stu[j].sum,stu[k].sum))
+				k = j; 
+		} 
+		if(k!=i)
+		{
+			temp = stu[i];
+			stu[i] = stu[k];
+			stu[k] = temp;
+		}
+	}
+}
+
+
